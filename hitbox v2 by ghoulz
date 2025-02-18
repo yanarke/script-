@@ -1,0 +1,125 @@
+local hitboxToggled = false
+local speedToggled = false
+local selectedPlayerName = ""
+local guiOpen = true
+
+local function updateHitboxes()
+    local localPlayer = game.Players.LocalPlayer
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        pcall(function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local hitbox = player.Character:FindFirstChild("HumanoidRootPart")
+                if hitbox then
+                    if player == localPlayer then
+                        hitbox.Size = Vector3.new(2, 2, 1)
+                    else
+                        if selectedPlayerName == "" or string.find(player.Name:lower(), selectedPlayerName:lower()) then
+                            hitbox.Size = hitboxToggled and Vector3.new(13, 13, 13) or Vector3.new(2, 2, 1)
+                            hitbox.CanCollide = false
+                            hitbox.Transparency = hitboxToggled and 0.5 or 1
+                            hitbox.Color = hitboxToggled and Color3.fromRGB(0, 0, 255) or Color3.fromRGB(255, 255, 255)
+                            
+                            local selectionBox = hitbox:FindFirstChild("HitboxOutline")
+                            if not selectionBox then
+                                selectionBox = Instance.new("SelectionBox", hitbox)
+                                selectionBox.Name = "HitboxOutline"
+                                selectionBox.Adornee = hitbox
+                            end
+                            selectionBox.Color3 = Color3.fromRGB(255, 0, 0)
+                            selectionBox.LineThickness = 0.05
+                            selectionBox.Visible = hitboxToggled
+                        else
+                            hitbox.Size = Vector3.new(2, 2, 1)
+                            hitbox.Transparency = 1
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end
+
+local function toggleHitbox()
+    hitboxToggled = not hitboxToggled
+    print(hitboxToggled and "Hitbox: ON" or "Hitbox: OFF")
+    updateHitboxes()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+local ModMenuFrame = Instance.new("Frame")
+local ToggleButton = Instance.new("TextButton")
+local SpeedButton = Instance.new("TextButton")
+local CloseButton = Instance.new("TextButton")
+local OpenGuiButton = Instance.new("TextButton")
+local TitleLabel = Instance.new("TextLabel")
+
+ScreenGui.Parent = game.CoreGui
+
+ModMenuFrame.Parent = ScreenGui
+ModMenuFrame.Size = UDim2.new(0, 250, 0, 200)
+ModMenuFrame.Position = UDim2.new(0.5, -125, 0.5, -100)
+ModMenuFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ModMenuFrame.BorderSizePixel = 2
+ModMenuFrame.BorderColor3 = Color3.fromRGB(139, 0, 0)
+ModMenuFrame.Draggable = true
+ModMenuFrame.Active = true
+ModMenuFrame.Visible = false
+
+TitleLabel.Parent = ModMenuFrame
+TitleLabel.Text = "Ghoulz Hub"
+TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextScaled = true
+
+ToggleButton.Parent = ModMenuFrame
+ToggleButton.Text = "Hitbox OFF"
+ToggleButton.Size = UDim2.new(0, 200, 0, 40)
+ToggleButton.Position = UDim2.new(0, 25, 0, 40)
+ToggleButton.MouseButton1Click:Connect(function()
+    toggleHitbox()
+    ToggleButton.Text = hitboxToggled and "Hitbox ON" or "Hitbox OFF"
+end)
+
+SpeedButton.Parent = ModMenuFrame
+SpeedButton.Text = "Speed OFF"
+SpeedButton.Size = UDim2.new(0, 200, 0, 40)
+SpeedButton.Position = UDim2.new(0, 25, 0, 90)
+SpeedButton.MouseButton1Click:Connect(function()
+    speedToggled = not speedToggled
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+        player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speedToggled and 38 or 16
+        SpeedButton.Text = speedToggled and "Speed ON" or "Speed OFF"
+    end
+end)
+
+CloseButton.Parent = ModMenuFrame
+CloseButton.Text = "Close"
+CloseButton.Size = UDim2.new(0, 200, 0, 40)
+CloseButton.Position = UDim2.new(0, 25, 0, 140)
+CloseButton.MouseButton1Click:Connect(function()
+    guiOpen = false
+    ModMenuFrame.Visible = false
+end)
+
+OpenGuiButton.Parent = ScreenGui
+OpenGuiButton.Text = "Open GUI"
+OpenGuiButton.Size = UDim2.new(0, 100, 0, 40)
+OpenGuiButton.Position = UDim2.new(0, 10, 0.5, -20)
+OpenGuiButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+OpenGuiButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+OpenGuiButton.MouseButton1Click:Connect(function()
+    guiOpen = not guiOpen
+    ModMenuFrame.Visible = guiOpen
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F then
+        guiOpen = not guiOpen
+        ModMenuFrame.Visible = guiOpen
+    elseif input.KeyCode == Enum.KeyCode.E then
+        toggleHitbox()
+        ToggleButton.Text = hitboxToggled and "Hitbox ON" or "Hitbox OFF"
+    end
+end)
