@@ -1,4 +1,4 @@
--- // GHOULZ HUB - Version finale (corrigée et complète)
+-- // GHOULZ HUB - Version 2.1
 
 repeat task.wait() until game:IsLoaded()
 local Players = game:GetService("Players")
